@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <title>品牌小红薯：国内首家垂直于小红书运营营销平台</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+    <meta name="renderer" content="webkit" />
+    <meta name="keywords" content="品牌小红薯，小红书kol资源种草，小红书推广方案，小红书笔记排名，小红书内容运营">
+    <meta name="description" content="品牌小红薯，是全国首家垂直于小红书APP运营推广营销平台，在这里有很多关于小红书运营知识方案，能快速的帮你找到小红书推广营销策略。">
+    <link rel="stylesheet" type="text/css" href="<%= htmlWebpackPlugin.files.css[0] %>">
+    <link rel="icon" href="./dist/td_icon.ico" type="image/x-icon" />
+    <link rel="stylesheet" name="theme" href="">
+    <!-- <link rel="stylesheet" type="text/css" href="https://unpkg.com/iview@3.4.1/dist/styles/iview.css"> -->
+     <!--[if lte IE 11]>
+    <meta http-equiv="refresh" content="0; url='http://www.meijiebao.org.cn/ie.html'" />
+    <![endif]-->
+</head>
+
+<body>
+    <div id="app">
+        <div class="ivu-spin ivu-spin-large ivu-spin-fix"><div class="ivu-spin-main"><span class="ivu-spin-dot"></span> <div class="ivu-spin-text"></div></div></div>
+    </div>
+    <div class="lock-screen-back" id="lock_screen_back"></div>
+    <script>
+        if (window.ActiveXObject) {
+            var reg = /10\.0/;
+            var str = navigator.userAgent;
+            if (reg.test(str)) {
+                window.location.href = "http://www.meijiebao.org.cn/ie.html";
+            };
+        };
+    </script>
+    <script type="text/javascript" src="https://cdn.dmh.bjhzkq.com/cdnmeijiebao/attach/cdn/vue.min.js"></script>
+    <!-- <script type="text/javascript" src="https://unpkg.com/iview@3.4.1/dist/iview.min.js"></script>  -->
+    <script src="https://cdn.dmh.bjhzkq.com/cdnmeijiebao/attach/cdn/axios.min.js"></script>
+    <script type="text/javascript" src="<%= htmlWebpackPlugin.files.js[0] %>"></script>
+    <script type="text/javascript" src="<%= htmlWebpackPlugin.files.js[1] %>"></script>
+    <script type="text/javascript" src="<%= htmlWebpackPlugin.files.js[2] %>"></script>
+</body>
+
+</html>

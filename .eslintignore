@@ -1,0 +1,4 @@
+src/vendors
+build
+router.js
+src/views/my-components/text-editor/tinymce
