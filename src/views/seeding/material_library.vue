@@ -25,17 +25,6 @@
                                 <Option v-for="(item, index) in saleData" :key="index" :value="item.id">{{item.username}}</Option>
                             </Select>
                         </FormItem>
-                        <FormItem label="评论:">
-                            <Select v-model="params.has_comment" clearable style="width:200px" @on-change="serchData">
-                                <Option :value="1">有评论</Option>
-                                <Option :value="0">无评论</Option>
-                            </Select>
-                        </FormItem>
-                        <FormItem label="总评论条数:">
-                            <Input class="section" v-model="params.change_comment" clearable style="width:200px" @on-change="serchData"></Input>
-                             <!-- <span class="border"> — </span> -->
-                            <!-- <Input class="section" v-model="comment2" clearable style="width:100px"></Input> -->
-                        </FormItem>
                         <FormItem label="状态:">
                             <Select v-model="params.status" clearable style="width:200px" @on-change="serchData">
                                 <Option :value="0">未发布</Option>
@@ -58,10 +47,15 @@
             <Card>
                 <Row class="searchable-table-con1">
                     <div class="button_wrap">
-                        <Button icon="md-add" type="primary" @click="showPubPage=true">添加素材</Button>
+                        <Button icon="md-add" type="primary" @click="showPubPage=true;editId=''">添加素材</Button>
+                        <div class="publish_count">
+                            <Tag type="border" color="#2c8df2">今日提交代写需求 {{publishCount.today}} 篇</Tag>
+                            <Tag type="border" color="#2c8df2">昨天提交代写需求 {{publishCount.yesterday}} 篇</Tag>
+                            <Tag type="border" color="#2c8df2">目前总提交代写需求 {{publishCount.total}} 篇</Tag>
+                        </div>
                     </div>
                     <Table stripe border :loading="tabLoading" :columns="columnsData" :data="resData"></Table>
-                    <Page :total="totalCount" :current="params.page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  style="margin-top:20px"></Page>
+                    <Page :total="totalCount" :current="params.page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  class="pageTemplate"></Page>
                 </Row>
             </Card>
         </div>
@@ -140,13 +134,29 @@
             </div>
         </Modal>
 
+        <!-- 复制素材 -->
+        <Modal
+            v-model="copyArticleModal"
+            :mask-closable="false"
+            title="复制稿件"> 
+            <Form :label-width="100" class="addContent">
+                <FormItem label="代写数量">
+                    <InputNumber :min="1" v-model="copyParams.copy_num" style="width:100px"></InputNumber>
+                </FormItem>
+            </Form>
+            <div slot="footer">
+                <Button @click="copyArticleModal=false">取消</Button>
+                <Button type="primary" :loading="copyBtnLoading" @click="copyArticle">确定</Button>
+            </div>
+        </Modal>
+
         <!-- 添加素材 编辑 -->
         <add-library v-if="showPubPage" :editId="editId" @hideAddLibrary="showPubPage=false, init()"></add-library>
     </div>
 </template>
 <script>
     import addLibrary from '@/views/seeding/components/add_library';
-    import { getSeedingMaterial, materialRemark, materialRemarkLog, getSeedingMaterialDetail } from '@/libs/api';
+    import { getSeedingMaterial, materialRemark, materialRemarkLog, getSeedingMaterialDetail, materialCopy } from '@/libs/api';
     import { url, userAuthority, getUserList, downloadingTools } from '@/mixins/mixin';
     import datePicker from '@/views/my-components/date-picker/date-picker';
     export default {
@@ -156,6 +166,7 @@
                 showPubPage: false,
                 tabLoading: false,
                 resData: [],
+                publishCount: {},       //今日提交代写需求：  篇     昨天提交代写需求：  篇    目前总提交代写需 篇
                 totalCount: 0,
                 editId: '',             //编辑 发布 id
                 marketData: [],         //营销顾问 
@@ -170,29 +181,52 @@
                 previewData: {},        //预览素材 数据
                 images: [],             //已上传的图片
                 imagesModal: false,     //已上传的图片 modal
+                copyArticleModal: false,//复制稿件 modal
+                copyParams: {},         //复制稿件 参数
+                copyBtnLoading: false,  //复制稿件 btn Loading
                 columnsData: [
                     {
                         key: '',
                         title: '操作',
-                        width: 80,
+                        width: 120,
                         render: (h, params) => {
+                            let arr = [];
                             if(params.row.status == 0){
-                                return h('Button', {
-                                    props: {
-                                        type: 'success',
-                                        size: 'small',
-                                        icon: 'md-create'
-                                    },
-                                    on: {
-                                        click: () => {
-                                            this.editId = params.row.id;
-                                            this.showPubPage = true;
+                                arr.push(h('Button', {
+                                        props: {
+                                            type: 'success',
+                                            size: 'small',
+                                        },
+                                        on: {
+                                            click: () => {
+                                                this.editId = params.row.id;
+                                                this.showPubPage = true;
+                                            }
                                         }
-                                    }
-                                }, '编辑')
+                                    }, '编辑')
+                                )
                             }else{
-                                return h('div', '已发布');
+                                arr.push(h('span', '已发布'));
                             }
+                            arr.push(h('Button',{
+                                props: {
+                                    type: 'primary',
+                                    size: 'small',
+                                },
+                                style: {
+                                    marginLeft: '5px'
+                                },
+                                on: {
+                                    click: () => {
+                                        this.copyParams = {
+                                            copy_id: params.row.id,
+                                            copy_num: params.row.num
+                                        }
+                                        this.copyArticleModal = true;
+                                    }
+                                }
+                            }, '复制'))
+                            return h('div', arr);
                         } 
                     },
                     {
@@ -296,6 +330,7 @@
                     this.tabLoading = false;
                     if(res.code == 200){
                         this.resData = res.data.list;
+                        this.publishCount = res.data.publish_count;
                         this.totalCount = res.data.totalCount;
                     }else{
                         this.$Notice.error({title: res.message});
@@ -350,21 +385,35 @@
                 this.imgName = name;
                 this.imgModal = true;
             },
+
+            //复制稿件
+            copyArticle(){
+                this.copyBtnLoading = true;
+                materialCopy(this.copyParams).then(res => {
+                    this.copyBtnLoading = false;
+                    if(res.code == 200){
+                        this.$Notice.success({ title: res.message });
+                        this.params.page = 1;
+                        this.init();
+                        this.copyArticleModal = false;
+                    }else{
+                        this.$Notice.error({ title: res.message });
+                    }
+                })
+            },
             
             //创建日期
             selectCreateTime(date){
                 this.params.created_start = date.createTimeStart;
                 this.params.created_end = date.createTimeEnd;
-                this.params.page = 1;
-                this.init();
+                this.serchData();
             },
 
             //完成日期
             selectPubTime(date){
                 this.params.finish_start = date.createTimeStart;
                 this.params.finish_end = date.createTimeEnd;
-                this.params.page = 1;
-                this.init();
+                this.serchData();
             },
 
             //列表下载
@@ -420,6 +469,13 @@
     .previewData{
         .ivu-form-item-label{
             font-weight: bold !important;
+        }
+    }
+    .button_wrap{
+        .publish_count{
+            display: inline-block;
+            vertical-align: top;
+            margin-left: 10px;
         }
     }
 </style>

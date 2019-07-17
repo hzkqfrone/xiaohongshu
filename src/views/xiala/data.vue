@@ -89,7 +89,7 @@
                         <show-table-head :loading="tabLoading" :columns="columnsData" :data="resData"></show-table-head>
                     </Row>
                     <template>
-                        <Page :total="totalCount" :current="params.page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  style="margin-top:20px"></Page>
+                        <Page :total="totalCount" :current="params.page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  class="pageTemplate"></Page>
                     </template>
                 </Card>
             </Col>
@@ -135,7 +135,7 @@
             transfer
             title="消费明细">
             <Table stripe border :loading="consumLoading" :columns="consumeCol" :data="consumeData"></Table>
-            <Page :total="consumeTotal" show-total @on-change="consumeChangeNum" style="margin-top:20px"></Page>
+            <Page :total="consumeTotal" show-total @on-change="consumeChangeNum" class="pageTemplate"></Page>
             <div slot="footer">
                 <Button @click="consumeLogModal=false">取消</Button>
                 <Button type="primary" @click="consumeLogModal=false">确定</Button>
@@ -166,7 +166,7 @@
                             :show-upload-list="false"
                             :on-success="handleSuccess"
                             :format="['jpg','jpeg','png']"
-                            :max-size="2048"
+                            :max-size="5120"
                             :on-format-error="handleFormatError"
                             :on-exceeded-size="exceededSize"
                             :before-upload="handleBeforeUpload"
@@ -312,7 +312,7 @@
                         minWidth: 80,
                     },
                     {
-                        key: 'ranking',
+                        key: 'data',
                         title: '排名',
                         minWidth: 60
                     }
@@ -520,7 +520,7 @@
                                             'action': this.actionPic,  
                                             'on-success': this.uploadTodaySuccess,
                                             'format': ['jpg','jpeg','png'],
-                                            'max-size': 2048,
+                                            'max-size': 5120,
                                             'show-upload-list': false,
                                             'on-format-error': this.handleFormatError,
                                             'on-exceeded-size': this.exceededSize,
@@ -780,7 +780,11 @@
 
             //上传截图  成功
             handleSuccess(res){
-                this.$set(this.upParams, 'online_pic', res.data.url);
+                if(res.code == 200){
+                    this.$set(this.upParams, 'online_pic', res.data.url);
+                }else{
+                    this.$Notice.error({ title: res.message });
+                }
             },
 
             //上传前
@@ -1037,42 +1041,6 @@
     }
     .screenshot a{
         display: block;
-    }
-    .demo-upload-list{
-        display: inline-block;
-        width: 60px;
-        height: 60px;
-        text-align: center;
-        line-height: 60px;
-        border: 1px solid transparent;
-        border-radius: 4px;
-        overflow: hidden;
-        background: #fff;
-        position: relative;
-        box-shadow: 0 1px 1px rgba(0,0,0,.2);
-        margin-right: 4px;
-    }
-    .demo-upload-list img{
-        width: 100%;
-        height: 100%;
-    }
-    .demo-upload-list-cover{
-        display: none;
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: rgba(0,0,0,.6);
-    }
-    .demo-upload-list:hover .demo-upload-list-cover{
-        display: block;
-    }
-    .demo-upload-list-cover i{
-        color: #fff;
-        font-size: 20px;
-        cursor: pointer;
-        margin: 0 2px;
     }
     .ivu-form-item-content{
         line-height: normal;

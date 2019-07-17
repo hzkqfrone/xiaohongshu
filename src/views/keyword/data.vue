@@ -26,6 +26,12 @@
                                     <Option :value="3">已过期</Option>
                                 </Select>
                             </FormItem>
+                            <FormItem label="有无排名">
+                                <Select v-model="params.has_rank" clearable style="width:200px" @on-change="serchData">
+                                    <Option :value="1">有排名</Option>
+                                    <Option :value="0">无排名</Option>
+                                </Select>
+                            </FormItem>
                             <FormItem label="关键词">
                                 <Input v-model="params.keyword" clearable placeholder="请输入关键词" style="width: 200px" @on-change="serchData" />
                             </FormItem>
@@ -73,7 +79,7 @@
                         <Tag type="border" color="blue">已过期词数: {{otherData[3]}}</Tag>
                     </Row>
                     <Row class="button_wrap">
-                        <Button type="primary" icon="md-add" v-if="isAuth([1,5,6])" @click="addModal=true, addParams={}">添加</Button>
+                        <Button type="primary" icon="md-add" v-if="isAuth([1,5,6])" @click="addModal=true, addParams={price:1}">添加</Button>
                         <Button type="success" icon="md-refresh" v-if="isAuth([1,5,6])" @click="showUpModalBtn">更新上线时间</Button>
                         <Button type="warning" icon="md-repeat" v-if="isAuth([1])" @click="fillTimeBtn">补时间</Button>
                         <Dropdown style="margin-left: 20px" v-if="isAuth([1])" @on-click="changeStatus">
@@ -89,7 +95,7 @@
                         <show-table-head :loading="tabLoading" :columns="columnsData" :data="resData"></show-table-head>
                     </Row>
                     <template>
-                        <Page :total="totalCount" :current="params.page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  style="margin-top:20px"></Page>
+                        <Page :total="totalCount" :current="params.page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  class="pageTemplate"></Page>
                     </template>
                 </Card>
             </Col>
@@ -121,7 +127,7 @@
                             :show-upload-list="false"
                             :on-success="contentHandleSuccess"
                             :format="['jpg','jpeg','png']"
-                            :max-size="2048"
+                            :max-size="5120"
                             :on-format-error="handleFormatError"
                             :on-exceeded-size="exceededSize"
                             :before-upload="handleBeforeUpload"
@@ -136,7 +142,7 @@
                     </div>
                 </FormItem>
                 <FormItem label="用户" prop="member_id">
-                    <Select v-model="addParams.member_id" clearable>
+                    <Select v-model="addParams.member_id" filterable clearable>
                         <Option v-for="(item, index) in userList" :key="index" :value="item.id">{{item.username}}</Option>
                     </Select>
                 </FormItem>
@@ -166,7 +172,7 @@
             v-model="consumeLogModal"
             title="消费明细"> 
             <Table stripe border :loading="consumLoading" :columns="consumeCol" :data="consumeData"></Table>
-            <Page :total="consumeTotal" show-total @on-change="consumeChangeNum" style="margin-top:20px"></Page>
+            <Page :total="consumeTotal" show-total @on-change="consumeChangeNum" class="pageTemplate"></Page>
             <div slot="footer">
                 <Button @click="consumeLogModal=false">取消</Button>
                 <Button type="primary" @click="consumeLogModal=false">确定</Button>
@@ -190,13 +196,13 @@
                             <Icon type="ios-trash-outline" @click.native="handleRemove"></Icon>
                         </div>
                     </div>
-                    <div v-show="!upParams.online_pic" @mouseenter="action=befroUploadTime('api/v1/file/images-screen')">
+                    <div v-show="!upParams.online_pic" @mouseenter="action=befroUploadTime('api/v1/publish/keyword/upload-screen')">
                         <Upload
                             ref="upload"
                             :show-upload-list="false"
                             :on-success="handleSuccess"
                             :format="['jpg','jpeg','png']"
-                            :max-size="2048"
+                            :max-size="5120"
                             :on-format-error="handleFormatError"
                             :on-exceeded-size="exceededSize"
                             :before-upload="handleBeforeUpload"
@@ -754,7 +760,7 @@
                                 h('div',{
                                     on:{
                                         mouseenter: ()=>{
-                                            this.actionPic = this.befroUploadTime('api/v1/file/images-img');
+                                            this.actionPic = this.befroUploadTime('api/v1/publish/keyword/upload-img');
                                         }
                                     }
                                 },[
@@ -763,7 +769,7 @@
                                             'action': this.actionPic, 
                                             'on-success': this.uploadTodaySuccess,
                                             'format': ['jpg','jpeg','png'],
-                                            'max-size': 2048,
+                                            'max-size': 5120,
                                             'show-upload-list': false,
                                             'on-format-error': this.handleFormatError,
                                             'on-exceeded-size': this.exceededSize,
@@ -862,10 +868,10 @@
                         {required: true, type:'number', message: '请输入单价', trigger: 'blur'},
                     ]
                 },
-                action: this.encrypt(`api/v1/file/images-screen`),
+                action: this.encrypt(`api/v1/publish/keyword/upload-screen`),
                 contentAction: this.encrypt(`api/v1/file/images`),        //上传笔记地址
                 params: {},             //搜索参数    
-                addParams: {},          //添加参数
+                addParams: {price: 1},          //添加参数
                 imgModal: false,        //查看截图大图
                 imgName: '',            //图片url
                 uploadcontentJt: [],    //笔记截图内容
@@ -877,8 +883,7 @@
                 noPassModal: false,     //审核不通过 弹窗
                 noPassLoading: false,   //审核不通过 确定按钮 loading
                 auditParams: {},        //审核 参数
-
-                historyImgColumns: [     //历史上线截图table
+                historyImgColumns: [    //历史上线截图table
                     {
                         key: 'created_at',
                         title: '日期',
@@ -918,7 +923,7 @@
                 showRemarks: false,      //备注 modal
                 remarkParams: {},        //备注参数
                 remarkLogData: [],       //备注日志
-                actionPic: this.encrypt(`api/v1/file/images-img`),
+                actionPic: this.encrypt(`api/v1/publish/keyword/upload-img`),
             }
         },
         created() {
@@ -975,6 +980,9 @@
                         if(this.addParams.id){
                             this.edit();
                         }else{
+                            if(this.addParams.link){
+                                this.addParams.link = this.addParams.link.replace(/\s+/g,"");
+                            }
                             addKeyword(this.addParams).then(res => {
                                 this.addBtnLoading = false;
                                 if(res.code == 200){

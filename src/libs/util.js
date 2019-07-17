@@ -283,6 +283,23 @@ util.fullscreenEvent = function (vm) {
     // 权限菜单过滤相关
     vm.$store.commit('updateMenulist');
 };
+// 除了技术和胡蓉 其他超级管理不加载下面路由
+let filters = ['management/receipt', 'management/notice', 'auth/role', 'auth/menu'];
+
+// 验证身份 
+let authFilter = function(){
+    // 角色 ID
+    let authIds = [1, 9, 12, 134, 156, 224];
+    let loginData  = localStorage.loginData ? JSON.parse(localStorage.loginData) : {};
+    var handle = false;
+    authIds.forEach(v => {
+        if(v == loginData.id){
+            handle = true;
+        }
+    });
+    return handle;
+}
+
 util.initRouter = function (vm) {
     var constRoutes = [];
     var otherRoutes = [];
@@ -297,40 +314,23 @@ util.initRouter = function (vm) {
         url: 'error-page/404'
     }];
     // 获取菜单列表
-    var _this = this;
     getCurrent().then(res => {
         if(res.code == 200){
             var menuData = res.data;
-            let menuObj = {};
-            menuData.forEach(val => {
+            menuData.forEach((val, index) => {
                 if(val.children != undefined){
                     var len = val.children.length;
-                    let menuFunc = 'menu_' + val.children[0].path.split('/')[1];
-                    menuObj[menuFunc] = [];
                     for(var i = 0;i < len;i++){
-                        if(val.children[i].children != undefined && val.children[i].children.length>0){
-                            let str = val.children[i].children;
-                            menuObj[menuFunc].push(str);
-                        } 
+                        try {
+                            if(filters.indexOf(val.children[i].url) >-1 && !authFilter()){
+                                delete menuData[index].children[i]
+                            }
+                        } catch (error) {
+                            
+                        }
                     }              
                 }
-                if(val.children == undefined){
-                    val.children=[{
-                        api:val.api,
-                        checked:true,
-                        expand:true,
-                        menu_css:val.menu_css,
-                        id:val.id,
-                        name:val.name,
-                        path:val.path,
-                        pid:val.pid,
-                        selected:true,
-                        title:val.title,
-                        url:val.api.substr(1)
-                    }]
-                }
             });
-            localStorage.setItem('funList',JSON.stringify(menuObj));
             util.initRouterNode(constRoutes, menuData);
             util.initRouterNode(otherRoutes, otherRouter);
             // 添加主界面路由
@@ -359,6 +359,7 @@ util.initRouter = function (vm) {
 // 生成路由节点
 util.initRouterNode = function (routers, data) {
     for (var item of data) {
+        if(!item || !item.children) return;
         let menu = Object.assign({}, item);
         // menu.component = import(`@/views/${menu.component}.vue`);
         menu.component = lazyLoading(menu.url);

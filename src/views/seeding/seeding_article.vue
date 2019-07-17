@@ -53,6 +53,8 @@
                     </Form>
                     <div class="button_wrap">
                         <Button icon="md-arrow-round-down" @click="downLoadBtn">下载</Button>
+                        <Button icon="md-arrow-round-down" @click="downLoadYesterdayBtn">昨日已发稿件</Button>
+                        <Button icon="md-arrow-round-down" @click="downLoadBtn('1')">下载稿件</Button>
                         <Button icon="ios-search" type="primary" @click="serchData">搜索</Button>
                     </div>
                 </Row>
@@ -60,7 +62,7 @@
             <Card>
                 <Row class="searchable-table-con1">
                     <Table stripe border :loading="tabLoading" :columns="columnsData" :data="resData"></Table>
-                    <Page :total="totalCount" :current="params.page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  style="margin-top:20px"></Page>
+                    <Page :total="totalCount" :current="params.page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  class="pageTemplate"></Page>
                 </Row>
             </Card>
 
@@ -107,7 +109,7 @@
 </template>
 <script>
     import pubTask from '@/views/seeding/components/pub_task';
-    import { getSeedingPubList, seedingAritcle, copySeeding } from '@/libs/api';
+    import { getSeedingPubList, seedingAritcle, copySeeding, downloadYesterdayArticle } from '@/libs/api';
     import { url, userAuthority, getUserList, downloadingTools } from '@/mixins/mixin';
     import datePicker from '@/views/my-components/date-picker/date-picker';
     export default {
@@ -430,6 +432,8 @@
                         minWidth: 60, 
                     },
                 ],
+                openDate: false,            //下载已发稿件 显示选择日期
+                downLoadDate: {},           //下载稿件 日期
             }
         },
         mounted() {
@@ -500,10 +504,23 @@
             },
 
             //列表下载
-            downLoadBtn(){
+            downLoadBtn(type){
                 var down = {export: 2};
+                if(type == 1){
+                    this.params.export_all = 1; 
+                }else{
+                    delete this.params.export_all;
+                }
                 getSeedingPubList(Object.assign(this.params,down)).then(res => {
                     this.downLoadwj(url + 'api/v1/publish/seeding?', this.params, res);
+                });
+            },
+
+            //下载昨日已发稿件
+            downLoadYesterdayBtn(){
+                var down = {export: 2};
+                downloadYesterdayArticle(down).then(res => {
+                    this.downLoadwj(url + 'api/v1/publish/seeding/yesterday-article?', this.params, res);
                 });
             },
 

@@ -49,10 +49,12 @@
             <Card>
                 <Row class="searchable-table-con1">
                     <div class="button_wrap">
-                        <Button icon="md-paper-plane" type="primary" @click="batchPubTask">发布任务</Button>
+                        <Button icon="md-paper-plane" type="primary" v-if="isAuth([1,5,6])" @click="batchPubTask">发布任务</Button>
+                        <Button icon="md-close" type="error"  @click="batchAuditNotPass">批量审核不通过</Button>
+                        <Button icon="md-checkmark" type="success" @click="batchAuditPass">批量审核通过</Button>
                     </div>
                     <Table stripe border :loading="tabLoading" :columns="columnsData" :data="resData" @on-selection-change="selectionChange"></Table>
-                    <Page :total="totalCount" :current="params.page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  style="margin-top:20px"></Page>
+                    <Page :total="totalCount" :current="params.page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  class="pageTemplate"></Page>
                 </Row>
             </Card>
 
@@ -87,7 +89,6 @@
         <Modal
             width="900"
             title="审核文案"
-            class=""
             :mask-closable="false"
             v-model="auditModal"> 
             <div class="audit_wrap">
@@ -107,7 +108,7 @@
         <!-- 审核不通过原因 -->
         <Modal
             v-model="noPassModal"
-            draggable 
+            :mask-closable="false"
             title="审核不通过原因">
             <Input type="textarea" :rows="4" placeholder="审核不通过原因" v-model="auditParams.argument"/>
             <div slot="footer">
@@ -177,26 +178,24 @@
                                     },
                                 },'预览文案')
                             )
-                            if(this.isAuth([1,5,6])){
-                                if(params.row.status == 0){
-                                    //未审核
-                                    arr.push(
-                                        h('Button', {
-                                            props: {
-                                                type: 'info',
-                                                size: 'small'
-                                            },
-                                            on:{
-                                                click: ()=> {
-                                                    this.auditModal = true;
-                                                    this.auditParams.id = params.row.id;
-                                                    this.detailData.title = params.row.title;
-                                                    this.getDetail(params.row.id);
-                                                }
+                            if(params.row.status == 0){
+                                //未审核
+                                arr.push(
+                                    h('Button', {
+                                        props: {
+                                            type: 'info',
+                                            size: 'small'
+                                        },
+                                        on:{
+                                            click: ()=> {
+                                                this.auditModal = true;
+                                                this.auditParams.ids = [params.row.id];
+                                                this.detailData.title = params.row.title;
+                                                this.getDetail(params.row.id);
                                             }
-                                        }, '审核')
-                                    )
-                                }
+                                        }
+                                    }, '审核')
+                                )
                             }
                             if(this.isAuth([1,5,6])){
                                 if(params.row.status==1){
@@ -345,6 +344,7 @@
             //审核
             audit(){
                 this.noPassLoading = true;
+                if(this.auditParams.audit == 1) delete this.auditParams.argument
                 seedingArticleAudit(this.auditParams).then(res => {
                     this.noPassLoading = false;
                     if(res.code == 200){
@@ -390,7 +390,13 @@
 
             //多选
             selectionChange(data){
+                this.auditParams = {
+                    ids: []
+                };
                 this.taskList = data;
+                data.forEach(v => {
+                    this.auditParams.ids.push(v.id);
+                })
             },
             
             //创建日期
@@ -423,6 +429,26 @@
                 this.init();
             },
 
+            //批量审核通过
+            batchAuditPass(){
+                this.$Modal.confirm({
+                    title: '已选择中文章确定审核通过吗?',
+                    onOk: () => {
+                        this.auditParams.audit = 1;
+                        this.audit();
+                    },
+                    onCancel: () => {
+                        
+                    }
+                });
+            },
+
+            //批量审核不通过
+            batchAuditNotPass(){
+                this.auditParams.audit = 2;
+                this.noPassModal = true;
+            },  
+
             //页码
             changeNum(page){
                 this.params.page = page;
@@ -454,6 +480,11 @@
         h4{
             padding-bottom:20px;
             text-align: center;
+        }
+        .content{
+            img{
+                max-width: 800px !important;
+            }
         }
     }
 </style>

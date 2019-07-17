@@ -158,9 +158,8 @@
             handleClickUserDropdown (name) {
                 //个人中心
                 if (name === 'ownSpace') {
-                    util.openNewPage(this, 'ownspace_index');
                     this.$router.push({
-                        name: 'ownspace_index'
+                        path: '/setting'
                     });
                 } else if (name === 'loginout') {
                     // 退出登录 

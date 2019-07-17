@@ -54,10 +54,12 @@
                             <FormItem v-for="(item, index) in params.content" :label="'图文内容'+(index+1)" :key="index" class="image_text">
                                 <div @click="clickUpload(index)" class="uploadBtn" @mouseenter="action=befroUploadTime('api/v1/publish/article/upload-word')">
                                     <Upload
+                                        :show-upload-list='false'
                                         :action="action"
                                         :format="['doc','docx']"
                                         :on-success="uploadSuccess"
                                         :on-error="uploadError"
+                                        :on-progress="progress"
                                         :on-exceeded-size="exceededSize"
                                         :on-format-error="handleFormatError">
                                         <Button icon="ios-cloud-upload-outline">word上传</Button>
@@ -70,7 +72,9 @@
                                             <div class="emoji_wrap">
                                                 <div class="xiaohongshu_img_icon">
                                                     <ul class="clearfix">
-                                                        <li v-for="(item, eindex) in emojiImg" :key="eindex" v-html="item" @click="clickEmImg(eindex, index)"></li>
+                                                        <li v-for="(item, eindex) in emojiImg" :key="eindex" @click="clickEmImg(item.label, eindex, index)">
+                                                            <img :src="`//ci.xiaohongshu.com/xy_emo_${item.label}.png?v=2`" class="shubaobao-expression" width="18" heihgt="18">
+                                                        </li>
                                                     </ul>
                                                 </div>
                                                 <div class="emoji_list">
@@ -94,7 +98,7 @@
             </Col>
         </Row>
         <div class="footer-wrapper" v-if="!isEdit">
-            <Button shape="circle">余额：{{Number(yu)-Number(amount)}}</Button>
+            <Button shape="circle">余额：{{Number(yu)}}</Button>
             <Button type="info">总计：{{amount || 0}}</Button>
         </div>
     </div>
@@ -130,7 +134,7 @@
                 isEdit: false,             //是否编辑
             }
         },
-        props:['tagList','yu', 'amount', 'editId'],
+        props:['tagList','yu', 'amount', 'editId', 'orderNum'],
         methods:{
             //重新选择
             againSelect(){
@@ -152,9 +156,19 @@
                 this.uploadCurrent = index;
             },
 
+            //上传中
+            progress(event){
+                this.$store.commit('setProgressStatus', true);
+            },
+
             //上传成功
             uploadSuccess(res, file){
-                this.$set(this.params.content, this.uploadCurrent, res.data.content);
+                this.$store.commit('setProgressStatus', true);
+                if(res.code == 200){
+                    this.$set(this.params.content, this.uploadCurrent, res.data.content);
+                }else{
+                    this.$Notice.warning({title: res.message});
+                }
             },
 
             //提交
@@ -199,11 +213,8 @@
                         this.mediaInfo.orderNum = res.data.content.length;
                         this.params = res.data;
                         this.params.num = res.data.content.length==0 ? 1 : res.data.content.length;
-                        this.params.content = [];
                         this.params.title = this.params.brandTitle;
-                        res.data.content.forEach((v) => {
-                            this.params.content.push(v.content);
-                        })
+                        this.params.content = res.data.content;
                         if(this.params.content.length==0) this.params.content = [''];
                         setTimeout(() => {
                             this.$refs.textarea.forEach((v, index) => {
@@ -228,14 +239,15 @@
             },
 
             //选择emoji图片
-            clickEmImg(eindex, index){
-                this.$refs.textarea[index].inserthtmls(this.emojiImg[eindex])
+            clickEmImg(name, eindex, index){
+                let img = `<img src="//ci.xiaohongshu.com/xy_emo_${name}.png?v=2" class="shubaobao-expression" width="18" heihgt="18">`;
+                this.$refs.textarea[index].inserthtmls(img)
             },
                           
         },
         mounted() {
             //根据权限加载指定用户列表
-            if(this.isAuth([1])){
+            if(this.isAuth([1, 5, 6])){
                 this.loadUserList();
             }
 
@@ -246,12 +258,16 @@
             if(this.tagList){
                 this.params.num = this.tagList.orderNum;
                 this.params.media_id = this.tagList.id;
-                var arry = new Array(this.tagList.orderNum);
+                let arry = new Array(this.tagList.orderNum);
                 this.$set(this.params, 'content', arry)
             }
             //是否编辑定制发布
             if(this.editId){
-                this.getEditInfo();
+                let arry = new Array(this.orderNum);
+                this.$set(this.params, 'content', arry);
+                this.$nextTick(() => {
+                    this.getEditInfo();
+                })
                 this.isEdit = true;
             }
             
@@ -338,57 +354,7 @@
     .uploadBtn{
         display: inline-block;
     }
-    .emoji{
-        display: inline-block;
-        margin-left:10px;
-        .ivu-poptip-popper{
-            width:100%;
-        }
-        i.ivu-icon{
-            font-size:22px;
-            cursor: pointer;
-        }
-    }
 </style>
-
 <style lang="less">
-    .emoji_wrap{
-        .xiaohongshu_img_icon{
-            .clearfix:after {
-                display: block;
-                clear: both;
-                content: "";
-                visibility: hidden;
-                height: 0;
-            }
-            li{
-                float:left;
-                list-style: none;
-                cursor: pointer;
-                border:1px solid #fff;
-                height:22px;
-                &:hover{
-                    border-color:red;
-                }
-            }
-        }
-        .emoji_list{
-            white-space: pre-wrap;
-            i{
-                display: inline-block;
-                font-style: normal;
-                cursor: pointer;
-                width:18px;
-                height:18px;
-                line-height: 18px;
-                border:1px solid #fff;
-                overflow: hidden;
-                &:hover{
-                    border-color:red;
-                }
-            }
-        }
-    }
+    @import "../../../styles/emoji.less";
 </style>
-
-

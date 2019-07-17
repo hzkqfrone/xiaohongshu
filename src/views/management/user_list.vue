@@ -40,12 +40,19 @@
                 <Card class="articleWrapper">
                     <Row class="button_wrap">
                         <Button type="primary" icon="md-add" v-if="isAuth([1])" @click="addModal=true, addParams={}">添加用户</Button>
+                        <div class="member_count">
+                            <Tag type="border" color="#2c8df2">资源发布客户数量 {{chain[0]}}</Tag>
+                            <Tag type="border" color="#2c8df2">搜索下拉客户数量 {{chain[1]}}</Tag>
+                            <Tag type="border" color="#2c8df2">关键词客户数量 {{chain[2]}}</Tag>
+                            <Tag type="border" color="#2c8df2">种草笔记客户数量 {{chain[3]}}</Tag>
+                            <Tag type="border" color="#2c8df2">红薯霸屏王合作客户数量 {{chain[4]}}</Tag>
+                        </div>
                     </Row>
                     <Row class="searchable-table-con1">
                         <show-table-head :loading="showLoading" :columns="columnsData" :data="resData"></show-table-head>
                     </Row>
                     <template>
-                        <Page :total="totalCount" :current="params.page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  style="margin-top:20px"></Page>
+                        <Page :total="totalCount" :current="params.page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  class="pageTemplate"></Page>
                     </template>
                 </Card>
             </Col>
@@ -129,6 +136,7 @@
                 addModal: false,                //添加用户modal
                 showLoading: false,
                 resData: [],
+                chain: [],                      //合作产品客户数量
                 totalCount: 0,                  //总条数
                 imgUrl: [],                     //资质图
                 columnsData: [  
@@ -195,6 +203,29 @@
                             return h('div', [
                                 h('p', {style: {color:'green'}}, params.row.frozen_seeding),
                                 h('p', {style: {color:'red'}}, params.row.seeding_money)
+                            ])
+                        }
+                    },
+                    {
+                        key: '',
+                        title: '霸屏王',
+                        minWidth: 60, 
+                        show: true,
+                        render: (h, params) => {
+                            return h('div', [
+                                h('p', {style: {color:'green'}}, params.row.screen)
+                            ])
+                        }
+                    },
+                    {
+                        key: '',
+                        title: '总积分 / 余额',
+                        minWidth: 60, 
+                        show: true,
+                        render: (h, params) => {
+                            return h('div', [
+                                h('p', {style: {color:'green'}}, params.row.frozen_integral),
+                                h('p', {style: {color:'red'}}, params.row.integral)
                             ])
                         }
                     },
@@ -354,6 +385,7 @@
                 getUserList(this.params).then(res => {
                     if(res.code == 200){
                         this.resData = res.data.list;
+                        this.chain = res.data.chain;
                         this.totalCount = res.data.totalCount;
                     }else{
                         this.$Notice.error({title: res.message});
@@ -468,3 +500,10 @@
         }
     }
 </script>
+<style lang="less" scoped>
+    .member_count{
+        display: inline-block;
+        margin-left: 10px;
+        vertical-align: top;
+    }
+</style>

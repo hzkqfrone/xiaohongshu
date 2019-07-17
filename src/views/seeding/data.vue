@@ -90,7 +90,7 @@
                         <Icon type="md-remove-circle" class="del_combo" v-if="index!=0" @click="delComboRow(index)" />
                     </FormItem>
                     <FormItem label="充值数量">
-                        <InputNumber :min="1" @on-change="changeRechargeNum" v-model="batchCombo[index].num"/>
+                        <InputNumber @on-change="changeRechargeNum" v-model="batchCombo[index].num"/>
                     </FormItem>     
                 </div>
                 <FormItem label="总价格">
@@ -109,7 +109,7 @@
             v-model="consumeLogModal"
             title="消费明细"> 
             <Table stripe border :loading="consumLoading" :columns="consumeCol" :data="consumeData"></Table>
-            <Page :total="consumeTotal" show-total @on-change="consumeChangeNum" style="margin-top:20px"></Page>
+            <Page :total="consumeTotal" show-total @on-change="consumeChangeNum" class="pageTemplate"></Page>
             <div slot="footer">
                 <Button @click="consumeLogModal=false">取消</Button>
                 <Button type="primary" @click="consumeLogModal=false">确定</Button>
@@ -349,7 +349,6 @@
                         key: 'ing_num',
                         title: '发布中',
                         minWidth: 60, 
-                        show: true,
                         tag: '1',
                         show: this.isAuth([2])
                     },
@@ -364,7 +363,6 @@
                         key: 'done_num',
                         title: ' 发布成功',
                         minWidth: 60, 
-                        show: true,
                         tag: '1',
                         show: this.isAuth([2])
                     },
@@ -495,10 +493,12 @@
         mounted(){
             this.init();
             this.getOther();
-            this.loadUserList();
-            this.getSeedingUserList();
-            this.getPackageList();
-            this.getCustomList();
+            if(!this.isAuth([2])){
+                this.loadUserList();
+                this.getSeedingUserList();
+                this.getPackageList();
+                this.getCustomList();
+            }
         },
         methods: {
             //加载列表
@@ -774,14 +774,14 @@
             handleClient(){
                 this.columnsData.forEach((v) =>{
                     if(v.tag){
-                        if(this.params.member_id){
+                        if(this.params.member_id || this.isAuth([2])){
                             v.show = true;
                         }else{
                             v.show = false;
                         }
                     }
                     if(v.key == "accumulate_num"){
-                        if(this.params.member_id){
+                        if(this.params.member_id || this.isAuth([2])){
                             v.show = false;
                         }else{
                             v.show = true;

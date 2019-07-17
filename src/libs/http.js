@@ -1,21 +1,23 @@
-import axios from 'axios'; //引用axios
-import Cookies from 'js-cookie'; //引用刚才我们创建的util.js文件，并使用getCookie方法
+import axios from 'axios'; 
+import Cookies from 'js-cookie'; 
 import qs from 'qs';
 import store from '@/store/index.js';
 import env from '../../build/env';
 import {router} from '../router/index';
 import md5 from 'js-md5';
 
-//生产环境接口地址 跟随网页域名变化
+//生产环境接口地址 跟随网页域名变化  
+//xhs.cn 为贾大师本地环境
 const ajaxUrl = env === 'development'
     ? 'http://xhs.cn/' : `${document.location.origin}/`;      
 
 // axios 配置
-// axios.defaults.timeout = 10000;
+// axios.defaults.timeout = 10000;        //设置接口请求超时时间
 // axios.defaults.baseURL = "https://www.ppxhs.com/"
+
 axios.defaults.baseURL = ajaxUrl;
 
-// http request 拦截器，通过这个，我们就可以把Cookie传到后台
+// http request 拦截器 请求前
 axios.interceptors.request.use(
     config => {
         config.headers = {
@@ -75,12 +77,12 @@ export function get(url, params = {}) {
         axios.get(url, {
             params: params
         })
-            .then(response => {
-                resolve(response.data);
-            })
-            .catch(err => {
-                reject(err)
-            })
+        .then(response => {
+            resolve(response.data);
+        })
+        .catch(err => {
+            reject(err)
+        })
     })
 }
 

@@ -43,16 +43,22 @@
                             <span>{{mediaInfo.orderNum}}</span>
                         </FormItem>
                         <FormItem label="完成日期：">
-                            <DatePicker type="datetime" :value="params.finish_time" :options="options" placeholder="只能选择当前时间的两天之后的时间" style="width: 250px" @on-change="changeDate"></DatePicker>
+                            <DatePicker type="datetime" :value="params.finish_time" :options="options" placeholder="只能选择当前时间的一天之后的时间" style="width: 250px" @on-change="changeDate"></DatePicker>
                             <div class="remark">只能选择当前时间的一天之后的时间</div>
                         </FormItem>
                         <FormItem label="期望优化的关键词：">
                             <Input class="input" type="textarea" :rows="5" v-model="keyword" placeholder="一行一个，几个订单可输入几个关键词，关键词数量只能等于订单数量。如果是同一个关键词，输入多次即可。"/>
                         </FormItem>
-                        <Alert type="error" class="alert">
-                            <p>注意： 一个素材最多提交9个照片，批量上传的图片根据上传的图片随机平均分布到每个素材订单，建议一个文章对应3-6个图片。</p>  
-                            <p>例如：订单数量是5，上传20个图片，平均每个素材是4个图片。</p> 
-                        </Alert>
+                        <FormItem label=" ">
+                            <Row>
+                                <Col :md="12" :sm="24">
+                                    <Alert type="error" class="alert">
+                                        <p>注意： 一个素材最多提交9个照片，批量上传的图片根据上传的图片随机平均分布到每个素材订单，建议一个文章对应3-6个图片。</p>  
+                                        <p>例如：订单数量是5，上传20个图片，平均每个素材是4个图片。</p> 
+                                    </Alert>
+                                </Col>
+                            </Row>
+                        </FormItem>
                         <FormItem label="图片批量上传：">
                             <div>
                                 <div class="demo-upload-list" v-for="(item, index) in uploadList" :key="index">
@@ -74,7 +80,7 @@
                                         :on-success="handleSuccess"
                                         :default-file-list="defaultList"
                                         :format="['jpg','jpeg','png','gif']"
-                                        :max-size="2048"
+                                        :max-size="5120"
                                         :on-format-error="handleFormatError"
                                         :on-exceeded-size="exceededSize"
                                         :data="upLoadData"
@@ -116,7 +122,9 @@
                                             <div class="emoji_wrap">
                                                 <div class="xiaohongshu_img_icon">
                                                     <ul class="clearfix">
-                                                        <li v-for="(item, eindex) in emojiImg" :key="eindex" v-html="item" @click="clickEmImg(eindex, index)"></li>
+                                                        <li v-for="(item, eindex) in emojiImg" :key="eindex" @click="clickEmImg(item.label, eindex, index)">
+                                                            <img :src="`//ci.xiaohongshu.com/xy_emo_${item.label}.png?v=2`" class="shubaobao-expression" width="18" heihgt="18">
+                                                        </li>
                                                     </ul>
                                                 </div>
                                                 <div class="emoji_list">
@@ -250,8 +258,9 @@
             },
 
             //选择emoji图片
-            clickEmImg(eindex, index){
-                this.$refs.textarea[index].inserthtmls(this.emojiImg[eindex])
+            clickEmImg(name, eindex, index){
+                let img = `<img src="//ci.xiaohongshu.com/xy_emo_${name}.png?v=2" class="shubaobao-expression" width="18" heihgt="18">`;
+                this.$refs.textarea[index].inserthtmls(img)
             },
 
             handleView (name) {
@@ -385,100 +394,11 @@
             color:red;
         }
     }
-    .emoji{
-        display: inline-block;
-        margin-left:10px;
-        .ivu-poptip-popper{
-            width:100%;
-        }
-        i.ivu-icon{
-            font-size:22px;
-            cursor: pointer;
-        }
-    }
-
-    .demo-upload-list{
-        display: inline-block;
-        width: 60px;
-        height: 60px;
-        text-align: center;
-        line-height: 60px;
-        border: 1px solid transparent;
-        border-radius: 4px;
-        overflow: hidden;
-        background: #fff;
-        position: relative;
-        box-shadow: 0 1px 1px rgba(0,0,0,.2);
-        margin-right: 4px;
-    }
-    .demo-upload-list img{
-        width: 100%;
-        height: 100%;
-    }
-    .demo-upload-list-cover{
-        display: none;
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: rgba(0,0,0,.6);
-    }
-    .demo-upload-list:hover .demo-upload-list-cover{
-        display: block;
-    }
-    .demo-upload-list-cover i{
-        color: #fff;
-        font-size: 20px;
-        cursor: pointer;
-        margin: 0 2px;
-    }
-
 </style>
 
 
-
 <style lang="less">
-    .emoji_wrap{
-        .xiaohongshu_img_icon{
-            .clearfix:after {
-                display: block;
-                clear: both;
-                content: "";
-                visibility: hidden;
-                height: 0;
-            }
-            li{
-                float:left;
-                list-style: none;
-                cursor: pointer;
-                border:1px solid #fff;
-                height:22px;
-                &:hover{
-                    border-color:red;
-                }
-            }
-        }
-        .emoji_list{
-            white-space: pre-wrap;
-            i{
-                display: inline-block;
-                font-style: normal;
-                cursor: pointer;
-                width:18px;
-                height:18px;
-                line-height: 18px;
-                border:1px solid #fff;
-                overflow: hidden;
-                &:hover{
-                    border-color:red;
-                }
-            }
-        }
-    }
-    .ivu-upload-list{
-        display: none;
-    }
+    @import "../../../styles/emoji.less";
     .demo-spin-icon-load{
         animation: ani-demo-spin 1s linear infinite;
     }
@@ -496,5 +416,3 @@
         border: 1px solid #eee;
     }
 </style>
-
-

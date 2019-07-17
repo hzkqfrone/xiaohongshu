@@ -75,14 +75,15 @@ export default {
                 if(res.code == 200){
                     let tag = false;
                     this.ajaxTime(true);
-                    if(res.data.length>0){
-                        res.data.forEach(val => {
+                    this.$store.commit('setChatNum', res.data.chat_num);
+                    if(res.data.system.length>0){
+                        res.data.system.forEach(val => {
                             if(this.msgId.indexOf(val.id) == -1){
                                 tag = true;
                             }
                         });
                         //有新消息时
-                        if(tag) this.msgList(res.data);
+                        if(tag) this.msgList(res.data.system);
                     } 
                 }else{
                     this.$Notice.error({title: res.message})

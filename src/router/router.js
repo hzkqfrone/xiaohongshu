@@ -6,7 +6,7 @@ export const loginRouter = {
     path: '/login',
     name: 'login',
     meta: {
-        title: 'Login - 登录'
+        title: '品牌小红薯 - 登录'
     },
     component: () => import('@/views/login.vue')
 };
@@ -42,8 +42,9 @@ export const otherRouter = {
     redirect: '/home',
     component: Main,
     children: [
-        { path: 'home', title: {i18n: 'home'}, meta: {keepAlive:true}, name: 'home_index', component: () => import('@/views/home/home.vue') },
-        { path: 'message', title: '消息中心', meta: {title: '消息中心',keepAlive:true}, name: 'message_index', component: () => import('@/views/message/message.vue') },
+        { path: 'home', title: '品牌小红薯', meta: {keepAlive:true}, name: 'home_index', component: () => import('@/views/home/home.vue') },
+        { path: 'message', title: '品牌小红薯 - 消息中心', meta: {title: '消息中心',keepAlive:true}, name: 'message_index', component: () => import('@/views/message/message.vue') },
+        { path: 'setting', title: '个人中心', meta: {title: '个人中心',keepAlive:true}, name: 'message_index', component: () => import('@/views/home/setting.vue') },
     ]
 };
 

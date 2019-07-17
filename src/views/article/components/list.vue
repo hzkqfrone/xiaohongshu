@@ -20,7 +20,7 @@
                                     <Option v-for="(item, index) in mediaList" :value="item.value" :key="index">{{ item.label }}</Option>
                                 </Select>
                             </FormItem>
-                            <FormItem label="用户:" v-if="isAuth([1])">
+                            <FormItem label="用户:" v-if="!isAuth([2])">
                                 <Select v-model="form.member_id" filterable clearable style="width:200px" @on-change="handleSearch">
                                     <Option v-for="(item, index) in userList" :key="index" :value="item.id">{{item.username}}</Option>
                                 </Select>
@@ -50,25 +50,11 @@
                         <show-table-head :loading="showLoading" :columns="columnsData" :data="resData"></show-table-head>
                     </Row>
                     <template>
-                        <Page :total="totalCount" :current="pageInfo.page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  style="margin-top:20px"></Page>
+                        <Page :total="totalCount" :current="pageInfo.page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  class="pageTemplate"></Page>
                     </template>
                 </Card>
             </Col>
         </Row>
-
-        <!-- 查看多条回链 -->
-        <Modal
-            v-model="backLinkModal"
-            title="回链">
-            <div v-if="backLinkArr.length==0">暂无数据~</div>
-            <Form v-else :label-width="20" class="backLinkModal">
-                <FormItem v-for="(item, index) in backLinkArr" :key="index">{{item}}</FormItem>
-            </Form>
-            <div slot="footer">
-                <Button @click="backLinkModal=false">取消</Button>
-                <Button type="primary" @click="backLinkModal=false">确定</Button>
-            </div>
-        </Modal>
 
         <!-- 查看图片-->
         <Modal
@@ -302,8 +288,6 @@
                 totalCount:0,
                 showLoading: false,
                 statusNum:{},
-                backLinkModal: false,             //查看多条回链
-                backLinkArr: [],                  //多条回链
                 includeModal: false,              //查看小红薯收录图片
                 includedImg: '',                  //小红薯收录图片
                 showPublish: false,               //显示编辑稿件
@@ -428,12 +412,6 @@
         }
         span.border{
             color:#666;
-        }
-        .backLinkModal{
-            color:red;
-            .ivu-form-item{
-                margin-bottom:0;
-            }
         }
         .include-image{
             img{

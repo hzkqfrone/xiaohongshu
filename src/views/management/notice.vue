@@ -93,7 +93,8 @@
                                     props: {
                                         trigger: 'hover',
                                         title: '',
-                                        placement: 'bottom'
+                                        placement: 'bottom',
+                                        transfer: true
                                     },
                                 }, [
                                     h('Tag', params.row.content),

@@ -1,6 +1,6 @@
 <template>
     <div class="repository">
-        <div>
+        <div v-if="!showArticleDetail">
             <Row :gutter="10">
                 <Col :md="24" :lg="18">
                     <Card class="search">
@@ -9,8 +9,8 @@
                         </Input>
                     </Card>
                     <Card class="noData" v-if="resData.length==0">暂无数据~</Card>
+                    <Spin size="large" v-if="showSpin" fix></Spin>
                     <Card class="article_wrap" v-for="(item, index) in resData" :key="index">
-                        <Spin size="large" v-if="showSpin" fix></Spin>
                         <Row class="content">
                             <Col :md="24" :lg="4">
                                 <div class="head_img">
@@ -29,7 +29,7 @@
                         </Row>
                     </Card>
                     <template>
-                        <Page :total="totalCount" :current="params.page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  style="margin-top:20px"></Page>
+                        <Page :total="totalCount" :current="params.page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  class="pageTemplate"></Page>
                     </template>
 
                 </Col>
@@ -56,7 +56,7 @@
                     </Card>
                     <Card class="work">
                         <h4>品牌小红薯业务<span class="border"></span></h4>
-                        <a href="http://www.ppxhs.com"><img src="../../images/yewu_01.png"></a>
+                        <a :href="xhsPath"><img src="../../images/yewu_01.png"></a>
                         <a href="javascript:;"><img src="../../images/yewu_02.png"></a>
                         <a href="http://www.ppdmh.com"><img src="../../images/yewu_03.png"></a>
                     </Card>
@@ -67,13 +67,13 @@
                 </Col>
             </Row>
         </div>
-        <!-- 详情 -->
-        <Modal
-            v-model="detailModal"
-            width='1200'
-            transfer
-            class="article_detail"
-            title="详情">
+
+        <Card v-if="showArticleDetail" class="article_detail">
+            <div slot="title">
+                <a href="javascript:;" @click="showArticleDetail=false">
+                    <Icon type="ios-arrow-back" />返回
+                </a>
+            </div>
             <div class="head">
                 <h3>{{detailData.title}}</h3>
                 <div class="desc">
@@ -82,22 +82,18 @@
                 </div>
             </div>
             <div class="content" v-html="detailData.content"> </div>
-            <div slot="footer">
-                <Button @click="detailModal=false">取消</Button>
-                <Button type="primary" @click="detailModal=false">确定</Button>
-            </div>
-        </Modal>
+        </Card>
     </div>
 </template>
 
 <script>    
-    import { userAuthority, src } from '@/mixins/mixin';
+    import { userAuthority, url } from '@/mixins/mixin';
     import { getArticleList, getArticleDetail, getArticleTagList } from '@/libs/api';
     export default {
         mixins: [userAuthority],
         data(){
             return{
-                detailModal: false,
+                showArticleDetail: false,
                 totalCount: 0,
                 params: {},
                 pageSize: 15,
@@ -106,9 +102,11 @@
                 detailData: {},
                 tagList: [],
                 defaultImg: 'this.src="' + require('../../images/card_bg.png') + '"',
+                xhsPath: '',
             }
         },
         created() {
+            this.xhsPath = this.url;
             this.init();
             this.getTagList();
         },
@@ -136,7 +134,7 @@
             detail(id){
                 getArticleDetail(id).then(res => {
                     if(res.code == 200){
-                        this.detailModal=true;
+                        this.showArticleDetail=true;
                         this.detailData = res.data;
                     }else{
                         this.$Notice.error({title: res.message});
@@ -338,20 +336,28 @@
             }
         }
     }
-</style>
-<style lang="less">
     .article_detail{
+        padding:0 20px 20px 20px;
         .head{
             text-align: center;
             h3{
-                padding-bottom:20px;
+                padding:20px 0;
             }
             span{
                 margin:0 10px;
             }
+            .desc{
+                color:#999;
+            }
         }
         .content{
             margin-top:20px;
+            img{
+                max-width: 100%;
+            }
+            ol{
+                padding-left: 1em;
+            }
         }
     }
 </style>

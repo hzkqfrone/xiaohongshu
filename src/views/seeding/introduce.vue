@@ -196,7 +196,18 @@
                             </div>
                         </Col>
                     </Row>
-                    <img src="./img/anli.png" class="anli">
+                    <div class="anli_wrap">
+                        <div class="border"></div>
+                        <div class="anli_top">
+                            <div class="anli_tab">
+                                <a href="javascript:;" :class="anli==0?'current':''" @click="anli=0">单品稿件-文稿案例</a>
+                                <img src="./img/anli_head.png">
+                                <a href="javascript:;" :class="anli==1?'current':''" @click="anli=1">常规案例分享稿件-文稿案例</a>
+                            </div>
+                        </div>
+                    </div>
+                    <img src="./img/anli_01.png" v-show="anli==0" class="anli">
+                    <img src="./img/anli_02.png" v-show="anli==1" class="anli">
                     <a href="javascript:;" class="advisory_btn">联系售后查看更多文案案例</a>
                 </div>
             </div>
@@ -230,6 +241,15 @@
         </Card>
     </div>
 </template>
+<script>
+export default {
+    data(){
+        return{
+            anli: 0,
+        }
+    }
+}
+</script>
 
 <style lang="less" scoped>
     .seeding_wrap{
@@ -437,6 +457,44 @@
                     display: block;
                     margin:0 auto;
                     max-width: 100%;
+                }
+                .anli_wrap{
+                    margin:30px 0;
+                    .border{
+                        width:100%;
+                        height:1px;
+                        background:#e5e5e5;
+                    }
+                    .anli_top{
+                        margin-top:-20px;
+                        text-align: center;
+                        .anli_tab{
+                            display: inline-block;
+                            padding:0 25px;
+                            background:#fff;
+                        }
+                        a{
+                           margin-top:-20px;
+                           display: inline-block;
+                           padding:0 19px;
+                           height:45px;
+                           text-align: center;
+                           line-height: 45px;
+                           border:1px solid #e9eced;
+                           color: #999999;
+                           font-size:16px;
+                           font-weight: 500;
+                           background:#fff;
+                           &.current{
+                               color:#f73a49;
+                               border: 1px solid #ffd9dc;
+                           }
+                        }
+                        img{
+                            display: inline-block;
+                            vertical-align: middle;
+                        }
+                    }
                 }
                 .advisory_btn{
                     display: block;

@@ -54,8 +54,12 @@ export default {
                     if(this.order){
                         this.$refs.ueditor.editor.body.innerHTML = this.details;
                     }else{
-                        let details = this.details ? this.details : ' ';
-                        this.$refs.ueditor.editor.body.innerHTML = this.$refs.ueditor.editor.body.innerHTML + details;
+                        try {
+                            let details = this.details ? this.details : ' ';
+                            this.$refs.ueditor.editor.body.innerHTML = details;
+                        } catch (error) {
+                            
+                        }
                     }
                 })
     　　　　},

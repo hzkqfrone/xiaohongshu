@@ -38,6 +38,7 @@ const app = {
         networkMS: 0,           //网速
         permission: '',         //权限
         progress: false,        //显示 上传中
+        chatNoReplyNum: 0,      //红薯商务通 未回复数
     },
     mutations: {
         // 动态添加主界面路由，需要缓存
@@ -237,6 +238,11 @@ const app = {
         //是否显示上传中
         setProgressStatus(state, status){
             state.progress = status;
+        },
+
+        //红薯商务通未回复数
+        setChatNum(state, num){
+            state.chatNoReplyNum = num;
         }
     }
 };

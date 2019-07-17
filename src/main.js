@@ -4,15 +4,17 @@ import {router} from './router/index';
 import {appRouter} from './router/router';
 import store from './store';
 import App from './app.vue';
-import '@/locale';
 import 'iview/dist/styles/iview.css';
 import VueI18n from 'vue-i18n';
 import util from './libs/util';
 import Cookies from 'js-cookie';
 import 'babel-polyfill';
+import locale from 'iview/dist/locale/zh-CN';
+import VueDND from 'awe-dnd';
 
+Vue.use(VueDND);
 Vue.use(VueI18n);
-Vue.use(iView);
+Vue.use(iView, { locale });
 
 new Vue({
     el: '#app',

@@ -30,7 +30,7 @@
                         <Table stripe border :loading="showLoading" :columns="columnsData" :data="resData"></Table>
                     </Row>
                     <template>
-                        <Page :total="totalCount" :current="params.page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  style="margin-top:20px"></Page>
+                        <Page :total="totalCount" :current="params.page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  class="pageTemplate"></Page>
                     </template>
                 </Card>
             </Col>

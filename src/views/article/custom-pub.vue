@@ -76,7 +76,7 @@
                             <Table ref="table" border :loading="loading" :columns="columnsData" :data="resData" @on-select="selectRow" @on-select-cancel="selectRow" @on-select-all="selectRow" @on-selection-change="selectRow"></Table>
                         </Row>
                         <template>
-                            <Page :total="totalCount" class="we-media-page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"></Page>
+                            <Page :total="totalCount" :current="searchCondition.page" class="we-media-page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"></Page>
                         </template>
                     </Row>
                 </Card>

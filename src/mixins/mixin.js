@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie';
 import md5 from 'js-md5';
-import { userList, pullCustomerList, keywordCustomerList, seedingCustomerList, getSaleList, getMarketList } from '@/libs/api';
+import { userList, pullCustomerList, keywordCustomerList, seedingCustomerList, getSaleList, getMarketList, getScreenCustomerList } from '@/libs/api';
 import env from '../../build/env';
 
 export const url = env === 'development'
@@ -13,7 +13,7 @@ export const beyondSize = {
         exceededSize(){
             this.$store.commit('setProgressStatus', false);
             this.$Notice.warning({
-                title: '图片大小不能超过2M！'
+                title: '图片大小不能超过5M！'
             });
         },
         handleFormatError (){
@@ -88,18 +88,6 @@ export const userAuthority = {
             });
             return handel;
         },
-
-        operatingAuth(name){
-            let handle = false;
-            let auth_list = JSON.parse(localStorage.getItem('funList'));
-            let msg = auth_list[`menu_${this.$route.path.split('/')[1]}`];
-            msg[0].forEach(val => {
-                if(val.name == name){
-                    handle = true;
-                }
-            });
-            return handle;
-        }
     },
 }
 
@@ -108,48 +96,168 @@ export const userAuthority = {
 export const ImgEmoji = {
     data(){
         return {
-            emojiArr: ['😄','😃','😀','😊','😊','😉','😍','😘','😚','😗','😙','😜','😝','😛','😳','😁','😔','😌','😒','😞','😣','😢','😂','😭','😪','😥','😰','😅','😓','😩','😫','😨','😱','😠','😡','😤','😖','😆','😋','😷','😎','😴','😵','😲','😟','😦','😈','👿','😮','😬','😐','😕','😯','😶','😇','😏','😑','👲','👳','👮','👷','💂','👶','👦','👧','👨','👩','👴','👵','👱','👼','👸','😺','😸','😻','😽','😼','🙀','😿','😹','😾','👹','👺','🙈','🙉','🙊','💀','👽','💩','🔥','✨','🌟','💫','💥','💢','💦','💧','💤','💨','👂','👀','👃','👅','👄','👍','👎','👌','👊','✊','✌','👋','✋','👐','👆','👇','👉','🙌','👈','🙏','☝','👏','💪','🚶','♀','️🚶','🏃‍','♀','🏃','💃','🕺','👫','👪','👬','👭','💏','💑','👯','🙆','🙅','💁','💆','👰','🙎','️🙍','🤷‍','🎩','👑','👒','🧢','👟','👞','👡','👠','👢','👙','👕','👔','👚','👗','🎽','👖','👘','💼','👜','👝','👛','👓','🎀','🌂','💄','💛','💙','💜','💚','❤','💔','💗','💓','💕','💖','💞','💘','💌','💋','💍','💎','👤','👥','💬','👣','💭'],
+            emojiArr: ['😄','😃','😀','😊','😊','😉','😍','😘','😚','😗','😙','😜','😝','😛','😳','😁','😔','😌','😒','😞','😣','😢','😂','😭','😪','😥','😰','😅','😓','😩','😫','😨','😱','😠','😡','😤','😖','😆','😋','😷','😎','😴','😵','😲','😟','😦','😈','👿','😮','😬','😐','😕','😯','😶','😇','😏','😑','👲','👳','👮','👷','💂','👶','👦','👧','👨','👩','👴','👵','👱','👼','👸','😺','😸','😻','😽','😼','🙀','😿','😹','😾','👹','👺','🙈','🙉','🙊','💀','👽','💩','🔥','✨','🌟','💫','💥','💢','💦','💧','💤','💨','👂','👀','👃','👅','👄','👍','👎','👌','👊','✊','✌','👋','✋','👐','👆','👇','👉','🙌','👈','🙏','☝','👏','💪','🚶','♀','️🚶','🏃‍','♀','🏃','💃','🕺','👫','👪','👬','👭','💏','💑','👯','🙆','🙅','💁','💆','👰','🙎','️🙍','🤷‍','🎩','👑','👒','🧢','👟','👞','👡','👠','👢','👙','👕','👔','👚','👗','🎽','👖','👘','💼','👜','👝','👛','👓','🎀','🌂','💄','💛','💙','💜','💚','❤','💔','💗','💓','💕','💖','💞','💘','💌','💋','💍','💎','👤','👥','💬','👣','💭'],                             
             emojiImg: [
-                '<img src="//ci.xiaohongshu.com/xy_emo_r_weixiao.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_haixiu.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_r_shiwang.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_hanyan.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_r_wa.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_r_henaicha.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_r_zipai.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_touxiao.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_feiwen.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_r_shihua.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_xiaoku.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_zan.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_r_anzhongguancha.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_r_maibao.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_r_daxiao.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_sese.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_shengqi.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_kure.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_mengmengda.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_r_xieyan.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_r_kelian.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_bishi.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_r_zhoumei.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_zhuakuang.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_r_wulian.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_r_paidui.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_baji.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_jingkong.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_r_koubi.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_zaijian.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_tanqi.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_r_shuijiao.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_deyi.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_r_chigua.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_fuqiang.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_r_heishuwenhao.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_r_huangjinshu.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_h_tushetou.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_h_chelian.png?v=2" class="shubaobao-expression" width="18" heihgt="18">',
-                '<img src="//ci.xiaohongshu.com/xy_emo_h_jingxia.png?v=2" class="shubaobao-expression" width="18" heihgt="18">'
+                {
+                    label: 'r_weixiao', 
+                    value: '[微笑R]'
+                },
+                {
+                    label: 'haixiu', 
+                    value: '[害羞R]'
+                },
+                {
+                    label: 'r_shiwang', 
+                    value: '[失望R]'
+                },
+                {
+                    label: 'hanyan', 
+                    value: '[汗颜R]'
+                },
+                {
+                    label: 'r_wa', 
+                    value: '[哇R]'
+                }, 
+                {
+                    label: 'r_henaicha', 
+                    value: '[喝奶茶R]'
+                },
+                {
+                    label: 'r_zipai', 
+                    value: '[自拍R]'
+                },
+                {
+                    label: 'touxiao', 
+                    value: '[偷笑R]'
+                },
+                {
+                    label: 'feiwen', 
+                    value: '[飞吻R]'
+                },
+                {
+                    label: 'r_shihua', 
+                    value: '[石化R]'
+                },
+                {
+                    label: 'xiaoku', 
+                    value: '[笑哭R]'
+                },
+                {
+                    label: 'zan', 
+                    value: '[赞R]'
+                },
+                {
+                    label: 'r_anzhongguancha', 
+                    value: '[暗中观察R]'
+                },
+                {
+                    label: 'r_maibao', 
+                    value: '[买爆R]'
+                },
+                {
+                    label: 'r_daxiao', 
+                    value: '[大笑R]'
+                },
+                {
+                    label: 'sese', 
+                    value: '[色色R]'
+                },
+                {
+                    label: 'shengqi', 
+                    value: '[生气R]'
+                },
+                {
+                    label: 'kure', 
+                    value: '[哭惹R]'
+                },
+                {
+                    label: 'mengmengda', 
+                    value: '[萌萌哒R]'
+                },
+                {
+                    label: 'r_xieyan', 
+                    value: '[斜眼R]'
+                },
+                {
+                    label: 'r_kelian', 
+                    value: '[可怜R]'
+                },
+                {
+                    label: 'bishi', 
+                    value: '[鄙视R]'
+                },
+                {
+                    label: 'r_zhoumei', 
+                    value: '[皱眉R]'
+                },
+                {
+                    label: 'zhuakuang', 
+                    value: '[抓狂R]'
+                },
+                {
+                    label: 'r_wulian', 
+                    value: '[捂脸R]'
+                },
+                {
+                    label: 'r_paidui', 
+                    value: '[派对R]'
+                },
+                {
+                    label: 'baji', 
+                    value: '[吧唧R]'
+                },
+                {
+                    label: 'jingkong', 
+                    value: '[惊恐R]'
+                },
+                {
+                    label: 'r_koubi', 
+                    value: '[抠鼻R]'
+                },
+                {
+                    label: 'zaijian', 
+                    value: '[再见R]'
+                },
+                {
+                    label: 'tanqi', 
+                    value: '[叹气R]'
+                },
+                {
+                    label: 'r_shuijiao', 
+                    value: '[睡觉R]'
+                },
+                {
+                    label: 'deyi', 
+                    value: '[得意R]'
+                },
+                {
+                    label: 'r_chigua', 
+                    value: '[吃瓜R]'
+                },
+                {
+                    label: 'fuqiang', 
+                    value: '[扶墙R]'
+                },
+                {
+                    label: 'r_heishuwenhao', 
+                    value: '[黑薯问号R]'
+                },
+                {
+                    label: 'r_huangjinshu', 
+                    value: '[黄金薯R]'
+                },
+                {
+                    label: 'h_tushetou', 
+                    value: '[吐舌头H]'
+                },
+                {
+                    label: 'h_chelian', 
+                    value: '[扯脸H]'
+                },
+                {
+                    label: 'h_jingxia', 
+                    value: '[惊吓H]'
+                }
             ],
         }
     }
@@ -163,6 +271,8 @@ export const getUserList = {
         return{
             userList:[],   //指定用户列表
             customerList: [],
+            marketData: [],
+            saleData: [],
         }
     },
     methods: {
@@ -202,6 +312,17 @@ export const getUserList = {
         //种草营销 - 用户列表
         getSeedingUserList(){
             seedingCustomerList().then(res => {
+                if(res.code == 200){
+                    this.customerList = res.data;
+                }else{
+                    this.$Notice.error({title: res.message});
+                }
+            })
+        },
+
+        //红薯霸屏王 - 用户列表
+        getBaPingUserList(){
+            getScreenCustomerList().then(res => {
                 if(res.code == 200){
                     this.customerList = res.data;
                 }else{

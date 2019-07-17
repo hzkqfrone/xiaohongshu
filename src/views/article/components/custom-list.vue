@@ -13,9 +13,9 @@
                     <Row>
                         <Form :label-width="$store.state.app.isFromMobile?auto:90" :label-position="$store.state.app.isFromMobile?'top':'right'" class="addContent" ref="params" inline>
                             <FormItem label="标题:">
-                                <Input v-model="form.brandTitle" clearable placeholder="请输入标题" style="width: 200px" />
+                                <Input v-model="form.title" clearable placeholder="请输入标题" style="width: 200px" />
                             </FormItem>
-                            <FormItem label="用户:" v-if="isAuth([1])">
+                            <FormItem label="用户:" v-if="!isAuth([2])">
                                 <Select v-model="form.member_id" filterable clearable style="width:200px" @on-change="handleSearch">
                                     <Option v-for="(item, index) in userList" :key="index" :value="item.id">{{item.username}}</Option>
                                 </Select>
@@ -48,7 +48,7 @@
                         <show-table-head :loading="showLoading" :columns="columnsData" :data="resData"></show-table-head>
                     </Row>
                     <template>
-                        <Page :total="totalCount" :current="pageInfo.page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  style="margin-top:20px"></Page>
+                        <Page :total="totalCount" :current="pageInfo.page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  class="pageTemplate"></Page>
                     </template>
                 </Card>
             </Col>
@@ -83,11 +83,11 @@
         <!-- 查看多个图片-->
         <Modal
             v-model="includeModal"
-            width='600'
+            width='750'
             title="小红书收录图片">
             <div v-if="includedImg.length==0">暂无数据~</div>
             <ul v-else class="include-image">
-                <li v-for="(item, index) in includedImg" :key="index"><img style="max-width:100%;" :src="item"></li>
+                <li v-for="(item, index) in includedImg" :key="index"><img :src="item"></li>
             </ul>
             <div slot="footer">
                 <Button @click="includeModal=false">取消</Button>
@@ -109,7 +109,7 @@
         </Modal>
         
         <!-- 小红书稿件编辑 -->
-        <custom-publish v-if="showPublish" :editId="editId" :tagList="editData" @addDetails="showPublish=false,init()"></custom-publish>
+        <custom-publish v-if="showPublish" :editId="editId" :orderNum="orderNum" :tagList="editData" @addDetails="showPublish=false,init()"></custom-publish>
     </div>
 </template>
 
@@ -126,6 +126,7 @@
         name: 'article_list',
         data () {
             return {
+                orderNum: 0,
                 dataModal: false,               //显示单个数据列表
                 tabLoading: false,             //单个数据加载中
                 tabColumnsData: [
@@ -147,7 +148,7 @@
                                 h('Input', {
                                     props:{
                                         type:'text',
-                                        value:this.resData[params.index].link
+                                        value: params.row.link
                                     },
                                     attrs:{
                                         class:'ivu-input'
@@ -174,7 +175,7 @@
                                         },
                                         on:{
                                             click: () => {
-                                                if(this.resData[params.index].link) window.open(this.resData[params.index].link,'_blank');
+                                                if(params.row.link) window.open(params.row.link,'_blank');
                                             }
                                         }
                                     })
@@ -193,19 +194,20 @@
                         title: '查看收录截图',
                         minWidth:80,
                         render: (h, params) => {
-                            if(params.row.isImage == 1){
-                                return h('img', {
-                                    attrs:{
-                                        src: params.row.fengmian
-                                    },
-                                    on:{
-                                        click: () =>{
-                                            this.fengmian = params.row.fengmian;
-                                            this.includedScreenshots = true;
-                                        }
+                            return h('img', {
+                                attrs:{
+                                    src: params.row.fengmian
+                                },
+                                style: {
+                                    maxWidth: '100%'
+                                },
+                                on:{
+                                    click: () =>{
+                                        this.fengmian = params.row.fengmian;
+                                        this.includedScreenshots = true;
                                     }
-                                })
-                            }
+                                }
+                            })
                         }
                     },
                     {
@@ -283,10 +285,7 @@
                 loading: true,
                 ids:[],
                 form:{ },
-                pageInfo:{
-                    per_page:15,
-                    page:1,
-                },
+                pageInfo:{},
                 mediaList:[],
                 pubStatusList:[],
                 userList:[],
@@ -395,6 +394,7 @@
                                         on:{
                                             click: ()=>{
                                                 this.showPublish = true;
+                                                this.orderNum = params.row.orderNum;
                                                 this.editId = params.row.id;
                                             }
                                         }
@@ -431,7 +431,7 @@
                         key: 'createTime',
                         title: '总效果数据',
                         minWidth:150,
-                        show: this.isAuth([1]),
+                        show: this.isAuth([1, 5, 6]),
                         render:  (h, params) =>{
                             return h('div',[
                                 h('span',[
@@ -487,14 +487,6 @@
                 editData: {},                     //编辑稿件列表
             };
         },
-        computed:{
-            //用户列表
-            userListCom() {
-                var obj={};  
-                obj=JSON.parse(JSON.stringify(this.userList)); 
-                return obj 
-            }
-        },
         methods: {
             //加载列表
             init () {
@@ -524,7 +516,6 @@
                     if (res.code === 200) {
                         this.mediaList = res.data.mediaList;
                         this.pubStatusList = res.data.pubStatusList;
-                        this.userList = res.data.userList;
                     } else {
                         this.$Notice.error({title:res.message});
                     }
@@ -623,10 +614,21 @@
                 margin-bottom:0;
             }
         }
-        .include-image{
-            img{
-                max-width: 100%;
-            }
+    }
+</style>
+<style lang="less">
+    .include-image{
+        li{
+            display: inline-block;
+            margin: 20px;
+            border: 1px solid #e5e5e5;
+            vertical-align: top;
+        }
+        img{
+            max-width: 300px;
         }
     }
 </style>
+
+
+                

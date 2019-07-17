@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Table border :loading="loading" :columns="cloumnsData" :data="data"  @on-selection-change="selectCol" :row-class-name="rowClassName"></Table>
+        <Table stripe border :loading="loading" :columns="cloumnsData" :data="data"  @on-selection-change="selectCol" :row-class-name="rowClassName"></Table>
     </div>
 </template>
 <script>

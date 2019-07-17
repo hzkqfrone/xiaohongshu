@@ -7,7 +7,13 @@
                         费用充值
                     </p>
                     <Row>
-                        <Form :label-width="$store.state.app.isFromMobile?auto:90" :label-position="$store.state.app.isFromMobile?'top':'right'" class="addContent" ref="params" inline>
+                        <Form 
+                            :label-width="$store.state.app.isFromMobile?auto:90" 
+                            :label-position="$store.state.app.isFromMobile?'top':'right'" 
+                            @keydown.native.enter.prevent ="keyDownEvent"
+                            class="addContent" 
+                            ref="params" 
+                            inline>
                             <FormItem label="用户名">
                                 <Input v-model="params.title" placeholder="请输入用户名" style="width: 200px" @on-change="init();params.page=1" />
                             </FormItem>
@@ -19,7 +25,7 @@
                         <Table stripe border :loading="showLoading" :columns="columnsData" :data="resData"></Table>
                     </Row>
                     <template>
-                        <Page :total="totalCount" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  style="margin-top:20px"></Page>
+                        <Page :total="totalCount" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  class="pageTemplate"></Page>
                     </template>
                 </Card>
             </Col>
@@ -42,6 +48,12 @@
                 </FormItem>
                 <FormItem label="充值种草营销">
                     <Input v-model="reParams.seeding_money" type="number"><span slot="append">元</span></Input>
+                </FormItem>
+                <FormItem label="充值霸屏王">
+                    <Input v-model="reParams.screen" type="number"><span slot="append">月</span></Input>
+                </FormItem>
+                <FormItem label="充值积分">
+                    <Input v-model="reParams.integral" type="number"></Input>
                 </FormItem>
                 <FormItem label="销售单据ID" prop="receipt_id">
                     <Input v-model="reParams.receipt_id" placeholder="请输入销售单据ID"/>
@@ -77,7 +89,7 @@
     </div>
 </template>
 <script>
-    import {rechargeList, recharge, rechargeDetail} from '@/libs/api';
+    import {rechargeList, recharge, rechargeDetail, integralRechargeDetail} from '@/libs/api';
     export default {
         data(){
             return {
@@ -118,7 +130,7 @@
                                             this.seeRechargeInfo(Object.keys(this.credit_type)[0], params.row.id);
                                         }
                                     }
-                                }, '充值明细')
+                                }, '明细')
                             ])
                         }
                     },
@@ -145,7 +157,7 @@
                                             this.seeRechargeInfo(Object.keys(this.credit_type)[1], params.row.id);
                                         }
                                     }
-                                }, '充值明细')
+                                }, '明细')
                             ])
                         }
                     },
@@ -172,7 +184,7 @@
                                             this.seeRechargeInfo(Object.keys(this.credit_type)[2], params.row.id);
                                         }
                                     }
-                                }, '充值明细')
+                                }, '明细')
                             ])
                         }
                     },
@@ -199,7 +211,61 @@
                                             this.seeRechargeInfo(Object.keys(this.credit_type)[3], params.row.id);
                                         }
                                     }
-                                }, '充值明细')
+                                }, '明细')
+                            ])
+                        }
+                    },
+                    {
+                        key: '',
+                        title: '霸屏王',
+                        minWidth: 60, 
+                        render: (h, params) => {
+                            return h('div', [
+                                h('Tag', {
+                                    props:{
+                                        type: 'border'
+                                    }
+                                }, params.row.screen),
+                                h('a',{
+                                    attrs: {
+                                        href: 'javascript:;'
+                                    },
+                                    style: {
+                                        display: 'block'
+                                    },
+                                    on: {
+                                        click: () => {
+                                            this.seeRechargeInfo(Object.keys(this.credit_type)[4], params.row.id);
+                                        }
+                                    }
+                                }, '明细')
+                            ])
+                        }
+                    },
+                    {
+                        key: '',
+                        title: '积分',
+                        minWidth: 60, 
+                        render: (h, params) => {
+                            return h('div', [
+                                h('Tag', {
+                                    props:{
+                                        type: 'border'
+                                    }
+                                }, params.row.frozen_integral),
+                                h('a',{
+                                    attrs: {
+                                        href: 'javascript:;'
+                                    },
+                                    style: {
+                                        display: 'block'
+                                    },
+                                    on: {
+                                        click: () => {
+                                            this.integralRechargeLog(params.row.id);
+                                        }
+                                    }
+                                }, '明细')
                             ])
                         }
                     },
@@ -238,12 +304,12 @@
                 reCol: [                    //充值明细
                     {
                         key: 'num',
-                        title: '充值费用',
+                        title: '变动金额',
                         minWidth: 60, 
                     },
                     {
                         key: 'created_at',
-                        title: '充值时间',
+                        title: '变动时间',
                         minWidth: 80, 
                     },
                     {
@@ -253,17 +319,22 @@
                     },
                     {
                         key: 'manager_name',
-                        title: '充值人',
+                        title: '操作人',
                         minWidth: 60, 
                     },
                     {
                         key: 'old_num',
-                        title: '充值前',
+                        title: '变动前',
                         minWidth: 60, 
                     },
                     {
                         key: 'new_num',
-                        title: '充值后',
+                        title: '变动后',
+                        minWidth: 60, 
+                    },
+                    {
+                        key: 'credit_type',
+                        title: '类型',
                         minWidth: 60, 
                     },
                 ],
@@ -334,6 +405,19 @@
                 })
             },
 
+            //积分充值明细
+            integralRechargeLog(id){
+                this.reLogModal = true;
+                this.reLoading = true;
+                integralRechargeDetail({member_id: id}).then(res => {
+                    this.reLoading = false;
+                    if(res.code == 200){
+                        this.reInfoData = res.data;
+                    }else{
+                        this.$Notice.error({ title: res.message });
+                    }
+                })
+            },
 
             //页码
             changeNum(page){
@@ -345,6 +429,10 @@
             changeSize(size){
                 this.params.per_page = size;
                 this.init();
+            },
+
+            keyDownEvent(){
+                
             }
         },
     }

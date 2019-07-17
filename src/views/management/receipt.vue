@@ -36,7 +36,7 @@
                         <Table stripe border :loading="showLoading" :columns="columnsData" :data="resData" @on-selection-change="selection"></Table>
                     </Row>
                     <template>
-                        <Page :total="totalCount" :current="params.page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  style="margin-top:20px"></Page>
+                        <Page :total="totalCount" :current="params.page" show-sizer show-elevator show-total @on-change="changeNum" @on-page-size-change="changeSize"  class="pageTemplate"></Page>
                     </template>
                 </Card>
             </Col>
@@ -136,6 +136,11 @@
                     {
                         key: 'zengSongMoney',
                         title: '赠送金额',
+                        minWidth: 60, 
+                    },
+                    {
+                        key: 'pmbNum',
+                        title: '赠送积分',
                         minWidth: 60, 
                     },
                     {

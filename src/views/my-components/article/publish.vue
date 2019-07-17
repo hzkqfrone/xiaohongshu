@@ -53,10 +53,12 @@
                             <FormItem v-for="(item, index) in params.content" :label="tagList[index].mediaName" :key="index" class="image_text">
                                 <div @click="clickUpload(index)" class="uploadBtn" @mouseenter="action=befroUploadTime('api/v1/publish/article/upload-word')">
                                     <Upload
+                                        :show-upload-list='false'
                                         :action="action"
                                         :format="['doc','docx']"
                                         :on-success="uploadSuccess"
                                         :on-error="uploadError"
+                                        :on-progress="progress"
                                         :on-exceeded-size="exceededSize"
                                         :on-format-error="handleFormatError">
                                         <Button icon="ios-cloud-upload-outline">word上传</Button>
@@ -69,7 +71,9 @@
                                             <div class="emoji_wrap">
                                                 <div class="xiaohongshu_img_icon">
                                                     <ul class="clearfix">
-                                                        <li v-for="(item, eindex) in emojiImg" :key="eindex" v-html="item" @click="clickEmImg(eindex, index)"></li>
+                                                        <li v-for="(item, eindex) in emojiImg" :key="eindex" @click="clickEmImg(item.label, eindex, index)">
+                                                            <img :src="`//ci.xiaohongshu.com/xy_emo_${item.label}.png?v=2`" class="shubaobao-expression" width="18" heihgt="18">
+                                                        </li>
                                                     </ul>
                                                 </div>
                                                 <div class="emoji_list">
@@ -79,7 +83,7 @@
                                         </div>
                                     </Poptip>
                                 </div>
-                                <editor :details="params.content[index]" :id="'editor'+index" ref="textarea"></editor>
+                                <editor :details="params.content[index]" :id="'editor'+index" ref="textarea" class="textarea"></editor>
                             </FormItem>
                         </div>
                     </Form>
@@ -148,9 +152,19 @@
                 this.uploadCurrent = index;
             },
 
+            //上传中
+            progress(event){
+                this.$store.commit('setProgressStatus', true);
+            },
+
             //上传成功
             uploadSuccess(res, file){
-                this.$set(this.params.content, this.uploadCurrent, res.data.content);
+                if(res.code == 200){
+                    this.$set(this.params.content, this.uploadCurrent, res.data.content);
+                }else{
+                    this.$Notice.warning({title: res.message});
+                }
+                this.$store.commit('setProgressStatus', false);
             },
 
             //提交
@@ -200,14 +214,15 @@
             },
 
             //选择emoji图片
-            clickEmImg(eindex, index){
-                this.$refs.textarea[index].inserthtmls(this.emojiImg[eindex])
+            clickEmImg(name, eindex, index){
+                let img = `<img src="//ci.xiaohongshu.com/xy_emo_${name}.png?v=2" class="shubaobao-expression" width="18" heihgt="18">`;
+                this.$refs.textarea[index].inserthtmls(img)
             },
                           
         },
         mounted() {
             //根据权限加载指定用户列表
-            if(this.isAuth([1])){
+            if(this.isAuth([1, 5, 6])){
                 this.loadUserList();
             }
             
@@ -313,59 +328,10 @@
     .uploadBtn{
         display: inline-block;
     }
-    .emoji{
-        display: inline-block;
-        margin-left:10px;
-        .ivu-poptip-popper{
-            width:100%;
-        }
-        i.ivu-icon{
-            font-size:22px;
-            cursor: pointer;
-            vertical-align: middle;
-            margin-top: -4px;
-        }
+    .textarea{
+        margin-top:10px;
     }
 </style>
-
 <style lang="less">
-    .emoji_wrap{
-        .xiaohongshu_img_icon{
-            .clearfix:after {
-                display: block;
-                clear: both;
-                content: "";
-                visibility: hidden;
-                height: 0;
-            }
-            li{
-                float:left;
-                list-style: none;
-                cursor: pointer;
-                border:1px solid #fff;
-                height:22px;
-                &:hover{
-                    border-color:red;
-                }
-            }
-        }
-        .emoji_list{
-            white-space: pre-wrap;
-            i{
-                display: inline-block;
-                font-style: normal;
-                cursor: pointer;
-                width:18px;
-                height:18px;
-                line-height: 18px;
-                border:1px solid #fff;
-                overflow: hidden;
-                &:hover{
-                    border-color:red;
-                }
-            }
-        }
-    }
+    @import "../../../styles/emoji.less";
 </style>
-
-

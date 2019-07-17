@@ -119,6 +119,7 @@
                 getRoleDetail(id).then(res => {
                     if(res.code == 200){
                         this.form.treeData = res.data;
+                        this.comQxChildren();
                         this.modalShow = true;
                     }else{
                         this.$Notice.error({ title: res.message });
@@ -156,6 +157,27 @@
                             this.$Notice.error({ title: res.message });
                         }
                     });
+                }
+            },
+
+            comQxChildren(){
+                for(var i=0;i < this.form.treeData.length;i++){
+                    let v = this.form.treeData[i];
+                    if(v.children){
+                        v.children.forEach(c1 => {
+                            if(!c1.checked){
+                                this.form.treeData[i].checked = false;
+                            }
+                            if(c1.children){
+                                c1.children.forEach(c2 => {
+                                    if(!c2.checked){
+                                        c1.checked = false;
+                                        this.form.treeData[i].checked = false;
+                                    }
+                                });
+                            }
+                        });
+                    }
                 }
             }
         },
